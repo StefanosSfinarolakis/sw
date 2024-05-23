@@ -1,6 +1,7 @@
 import streamlit as st
 from data_loader import load_data
 from visualization import pca_plot, tsne_plot, eda_histogram, eda_scatter_plot
+from machinelearning import classify_knn, classify_decision_tree, cluster_kmeans, cluster_gmm
 from streamlit_navigation_bar import st_navbar
 
 selected_tab = st_navbar(["Data Loader", "2D Visualization", "Machine Learning"])
@@ -41,7 +42,6 @@ if uploaded_file is not None:
         st.header("2D Visualization")
         label_column = data.columns[-1]
         
-        # Replace the "Show" buttons with a dropdown menu
         option = st.selectbox("Select Visualization", ["None", "PCA Plot", "t-SNE Plot", "EDA Charts"])
         
         if option == "PCA Plot":
@@ -61,8 +61,33 @@ if uploaded_file is not None:
             x_column = st.selectbox("Select X", data.columns[:-1])
             y_column = st.selectbox("Select Y", data.columns[:-1], index=1)
             scatter_fig = eda_scatter_plot(data, x_column=x_column, y_column=y_column, label_column=label_column)
-
             st.plotly_chart(scatter_fig)
 
     elif selected_tab == "Machine Learning":
-        st.header("WIP")
+        ml_tab = st.selectbox("Select Task", ["Classification", "Clustering"])
+        
+        if ml_tab == "Classification":
+            st.header("Classification")
+            classifier = st.selectbox("Select Classifier", ["K-Nearest Neighbors", "Decision Tree"])
+            
+            if classifier == "K-Nearest Neighbors":
+                k = st.slider("Select number of neighbors (k)", 1, 15, 3)
+                accuracy = classify_knn(data, data.columns[:-1], data.columns[-1], k)
+                st.write(f"Accuracy of K-Nearest Neighbors: {accuracy}")
+            elif classifier == "Decision Tree":
+                max_depth = st.slider("Select max depth", 1, 15, 3)
+                accuracy = classify_decision_tree(data, data.columns[:-1], data.columns[-1], max_depth)
+                st.write(f"Accuracy of Decision Tree: {accuracy}")
+        
+        elif ml_tab == "Clustering":
+            st.header("Clustering")
+            clusterer = st.selectbox("Select Clustering Algorithm", ["K-Means", "Gaussian Mixture"])
+            
+            if clusterer == "K-Means":
+                n_clusters = st.slider("Select number of clusters", 2, 10, 3)
+                silhouette = cluster_kmeans(data, data.columns[:-1], n_clusters)
+                st.write(f"Silhouette Score of K-Means: {silhouette}")
+            elif clusterer == "Gaussian Mixture":
+                n_components = st.slider("Select number of components", 2, 10, 3)
+                silhouette = cluster_gmm(data, data.columns[:-1], n_components)
+                st.write(f"Silhouette Score of Gaussian Mixture: {silhouette}")
