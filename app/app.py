@@ -3,8 +3,10 @@ from data_loader import load_data
 from visualization import pca_plot, tsne_plot, eda_histogram, eda_scatter_plot
 from machinelearning import classify_knn, classify_decision_tree, cluster_kmeans, cluster_gmm
 from streamlit_navigation_bar import st_navbar
+import pandas as pd
+from info import Info_tab
 
-selected_tab = st_navbar(["Data Loader", "2D Visualization", "Machine Learning"])
+selected_tab = st_navbar(["Data Loader", "2D Visualization", "Machine Learning","Info"])
 
 st.title("Τεχνολογία Λογισμικού")
 
@@ -67,27 +69,50 @@ if uploaded_file is not None:
         ml_tab = st.selectbox("Select Task", ["Classification", "Clustering"])
         
         if ml_tab == "Classification":
-            st.header("Classification")
-            classifier = st.selectbox("Select Classifier", ["K-Nearest Neighbors", "Decision Tree"])
-            
-            if classifier == "K-Nearest Neighbors":
-                k = st.slider("Select number of neighbors (k)", 1, 15, 3)
-                accuracy = classify_knn(data, data.columns[:-1], data.columns[-1], k)
-                st.write(f"Accuracy of K-Nearest Neighbors: {accuracy}")
-            elif classifier == "Decision Tree":
-                max_depth = st.slider("Select max depth", 1, 15, 3)
-                accuracy = classify_decision_tree(data, data.columns[:-1], data.columns[-1], max_depth)
-                st.write(f"Accuracy of Decision Tree: {accuracy}")
+            st.header("Classification")            
+            st.subheader("K-Nearest Neighbors")
+            k = st.slider("Select number of neighbors (k) for K-Nearest Neighbors", 1, 15, 3)
+            accuracy_knn = classify_knn(data, data.columns[:-1], data.columns[-1], k)
+            st.subheader("Decision Tree")               
+            max_depth_dt = st.slider("Select maximum depth for Decision Tree", 1, 20, 3, key="max_depth_slider")
+            accuracy_dt = classify_decision_tree(data, data.columns[:-1], data.columns[-1], max_depth=max_depth_dt)
+            comparison_data = {
+            "Model": ["K-Nearest Neighbors", "Decision Tree"],
+            "Accuracy": [accuracy_knn, accuracy_dt]
+            }
+            comparison_df = pd.DataFrame(comparison_data)
+            st.write("Comparison Table:")
+            st.table(comparison_df)
+            if accuracy_knn > accuracy_dt:
+                st.write(f"K-Nearest Neighbors has a higher accuracy ({accuracy_knn:.2f}).")
+            elif accuracy_knn < accuracy_dt:
+                st.write(f"Decision Tree has a higher accuracy ({accuracy_dt:.2f}).")
+            else:
+                st.write("Both models have the same accuracy.")
+        
         
         elif ml_tab == "Clustering":
-            st.header("Clustering")
-            clusterer = st.selectbox("Select Clustering Algorithm", ["K-Means", "Gaussian Mixture"])
-            
-            if clusterer == "K-Means":
-                n_clusters = st.slider("Select number of clusters", 2, 10, 3)
-                silhouette = cluster_kmeans(data, data.columns[:-1], n_clusters)
-                st.write(f"Silhouette Score of K-Means: {silhouette}")
-            elif clusterer == "Gaussian Mixture":
-                n_components = st.slider("Select number of components", 2, 10, 3)
-                silhouette = cluster_gmm(data, data.columns[:-1], n_components)
-                st.write(f"Silhouette Score of Gaussian Mixture: {silhouette}")
+            st.header("Clustering")            
+            st.subheader("K-means")
+            k = st.slider("Select number of Clusters", 2, 15, 3)
+            silhouette_k = cluster_kmeans(data, data.columns[:-1], k)
+            st.subheader("Gaussian Mixture")               
+            n_components = st.slider("Select number of components", 2, 10, 3)
+            silhouette = cluster_gmm(data, data.columns[:-1], n_components)
+            comparison_data = {
+            "Model": ["K-means", "Gaussian Mixture"],
+            "Accuracy": [silhouette_k, silhouette]
+            }
+            comparison_df = pd.DataFrame(comparison_data)
+            st.write("Comparison Table:")
+            st.table(comparison_df)
+            if silhouette_k > silhouette:
+                st.write(f"K-means has a higher accuracy ({silhouette_k:.2f}).")
+            elif silhouette_k < silhouette:
+                st.write(f"Gaussian Mixture has a higher accuracy ({silhouette:.2f}).")
+            else:
+                st.write("Both models have the same accuracy.")
+        
+    elif selected_tab == "Info":
+        Info_tab()
+                  
