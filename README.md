@@ -10,15 +10,18 @@
 
 ## How To Run App
 
-Αρχικά, χρειάζεται να κατέβει το Docker Desktop στο σύστημα.
+Αρχικά, απαιτείται να κατέβει το Docker Desktop στο σύστημα.
 
-Μετά, δημιουργία του dockerfile:
+Μετά, χρειάζεται δημιουργία του dockerfile:
+
+```
 FROM python:3.11.9
 WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 COPY . .
-CMD ["streamlit", "run", "app/app.py"]
+CMD ["streamlit", "run", "app/app.py"}
+```
 
 Μέσω αυτών των εντολών όπου αποτελούν το περιεχόμενο του
 αρχείου "Dockerfile" ορίζεται τον ευρετήριο της εφαρμογής,
@@ -26,5 +29,9 @@ CMD ["streamlit", "run", "app/app.py"]
 τρέχει το βασικό αρχείο της εφαρμογής.
  ́Επειτα την δημιουργία του αρχείου θα χρειαστεί να εκτελεστούν οι
 ακόλουθες εντολές:
-• docker build -t "your_app_name" .
-• docker run -p 8501:8501 "your_app_name"
+```
+docker build -t "your_app_name" .
+```
+```
+docker run -p 8501:8501 "your_app_name"
+```
